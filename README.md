@@ -8,7 +8,7 @@ The ticket says:
 
 ### Refactor Ticket Service
 The ticket service functionally works well and the function and logic of it must not change. However it requires refactoring to improve readability. When refactoring, focus on applying clean code principles. The final result should be something ready to merge into the next release of the product and meets the definition of done. You are free to define the definition of done for yourself.
-Keep in mind principles such as SOLID, KISS, DRY and YAGNI.
+Keep in mind principles such as **SOLID**, **KISS**, **DRY** and **YAGNI**.
 
 #### Limitations
 Due to dependencies in other areas of the larger product, there are a few limitations that must be followed during the refactoring:
