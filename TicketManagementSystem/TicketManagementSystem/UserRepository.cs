@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using TicketManagementSystem.UserFeature.Models;
 
 namespace TicketManagementSystem
 {

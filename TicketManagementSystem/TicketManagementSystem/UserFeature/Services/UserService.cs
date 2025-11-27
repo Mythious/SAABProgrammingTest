@@ -1,4 +1,5 @@
 ﻿using TicketManagementSystem.UserFeature.Exceptions;
+using TicketManagementSystem.UserFeature.Models;
 
 namespace TicketManagementSystem.UserFeature.Services
 {

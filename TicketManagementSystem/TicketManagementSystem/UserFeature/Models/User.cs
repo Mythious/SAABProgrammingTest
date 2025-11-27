@@ -1,4 +1,4 @@
-﻿namespace TicketManagementSystem
+﻿namespace TicketManagementSystem.UserFeature.Models
 {
     public class User
     {

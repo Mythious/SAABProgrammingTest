@@ -1,4 +1,6 @@
-﻿namespace TicketManagementSystem.UserFeature.Services
+﻿using TicketManagementSystem.UserFeature.Models;
+
+namespace TicketManagementSystem.UserFeature.Services
 {
 	/// <summary>
 	/// Defines the contract for user-related operations and services.

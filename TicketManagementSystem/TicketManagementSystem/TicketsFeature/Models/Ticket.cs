@@ -1,5 +1,6 @@
 ﻿using System;
-namespace TicketManagementSystem
+using TicketManagementSystem.UserFeature.Models;
+namespace TicketManagementSystem.TicketsFeature.Models
 {
     public class Ticket
     {
