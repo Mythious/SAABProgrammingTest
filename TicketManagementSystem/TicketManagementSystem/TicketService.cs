@@ -3,18 +3,21 @@ using System.Configuration;
 using System.IO;
 using System.Text.Json;
 using EmailService;
+using TicketManagementSystem.Core.Validators;
+using TicketManagementSystem.TicketsFeature.Models;
+using TicketManagementSystem.TicketsFeature.Validators;
 
 namespace TicketManagementSystem
 {
     public class TicketService
     {
-        public int CreateTicket(string t, Priority p, string assignedTo, string desc, DateTime d, bool isPayingCustomer)
+        // Implemented concrete implementations due to the requirements of keeping Program.cs unchanged.
+        // These implementations would normally be dependency injected during the bootstrap of the application.
+        private readonly IValidator<TicketTextData> _ticketTextValidator = new TicketTextValidator();
+        
+        public int CreateTicket(string title, Priority priority, string assignedTo, string description, DateTime timeStamp, bool isPayingCustomer)
         {
-            // Check if t or desc are null or if they are invalid and throw exception
-            if (t == null || desc == null || t == "" || desc == "")
-            {
-                throw new InvalidTicketException("Title or description were null");
-            }
+            _ticketTextValidator.Validate(new TicketTextData(title, description));
 
             User user = null;
             using (var ur = new UserRepository())
@@ -31,36 +34,36 @@ namespace TicketManagementSystem
             }
 
             var priorityRaised = false;
-            if (d < DateTime.UtcNow - TimeSpan.FromHours(1))
+            if (timeStamp < DateTime.UtcNow - TimeSpan.FromHours(1))
             {
-                if (p == Priority.Low)
+                if (priority == Priority.Low)
                 {
-                    p = Priority.Medium;
+	                priority = Priority.Medium;
                     priorityRaised = true;
                 }
-                else if (p == Priority.Medium)
+                else if (priority == Priority.Medium)
                 {
-                    p = Priority.High;
+	                priority = Priority.High;
                     priorityRaised = true;
                 }
             }
 
-            if ((t.Contains("Crash") || t.Contains("Important") || t.Contains("Failure")) && !priorityRaised)
+            if ((title.Contains("Crash") || title.Contains("Important") || title.Contains("Failure")) && !priorityRaised)
             {
-                if (p == Priority.Low)
+                if (priority == Priority.Low)
                 {
-                    p = Priority.Medium;
+                    priority = Priority.Medium;
                 }
-                else if (p == Priority.Medium)
+                else if (priority == Priority.Medium)
                 {
-                    p = Priority.High;
+                    priority = Priority.High;
                 }
             }
 
-            if (p == Priority.High)
+            if (priority == Priority.High)
             {
                 var emailService = new EmailServiceProxy();
-                emailService.SendEmailToAdministrator(t, assignedTo);
+                emailService.SendEmailToAdministrator(title, assignedTo);
             }
 
             double price = 0;
@@ -69,7 +72,7 @@ namespace TicketManagementSystem
             {
                 // Only paid customers have an account manager.
                 accountManager = new UserRepository().GetAccountManager();
-                if (p == Priority.High)
+                if (priority == Priority.High)
                 {
                     price = 100;
                 }
@@ -81,11 +84,11 @@ namespace TicketManagementSystem
 
             var ticket = new Ticket()
             {
-                Title = t,
+                Title = title,
                 AssignedUser = user,
-                Priority = p,
-                Description = desc,
-                Created = d,
+                Priority = priority,
+                Description = description,
+                Created = timeStamp,
                 PriceDollars = price,
                 AccountManager = accountManager
             };
