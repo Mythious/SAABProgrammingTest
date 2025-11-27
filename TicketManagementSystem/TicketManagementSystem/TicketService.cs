@@ -65,20 +65,29 @@ namespace TicketManagementSystem
             });
         }
 
+        /// <summary>
+        /// Assigns a ticket to a specified user.
+        /// </summary>
+        /// <param name="id">The unique identifier of the ticket to assign.</param>
+        /// <param name="username">The username of the user to whom the ticket will be assigned.</param>
+        /// <exception cref="InvalidTicketException">
+        /// Thrown when no ticket is found for the provided identifier.
+        /// </exception>
+        /// <exception cref="UnknownUserException">
+        /// Thrown when no user is found for the provided username.
+        /// </exception>
         public void AssignTicket(int id, string username)
         {
             // Acquire the user from the username
             var user = _userService.GetUser(username);
 
-            var ticket = TicketRepository.GetTicket(id);
-
-            if (ticket == null)
-            {
-                throw new ApplicationException("No ticket found for id " + id);
-            }
-
+            // Attempt to acquire the ticket by the provided id
+            var ticket = GetTicket(id);
+            
+            // Assign the new assigned user to the found ticket
             ticket.AssignedUser = user;
 
+            // Request a ticket update to the repository.
             TicketRepository.UpdateTicket(ticket);
         }
 
@@ -94,7 +103,27 @@ namespace TicketManagementSystem
 		{
 			return isPayingCustomer ? _userService.GetAccountManager() : null;
 		}
-    }
+
+        /// <summary>
+        /// Retrieves a ticket by its unique identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the ticket to retrieve.</param>
+        /// <returns>The <see cref="Ticket"/> object corresponding to the specified identifier.</returns>
+        /// <exception cref="InvalidTicketException">
+        /// Thrown when no ticket is found for the provided identifier.
+        /// </exception>
+		private Ticket GetTicket(int id)
+		{
+			var ticket = TicketRepository.GetTicket(id);
+
+			if (ticket == null)
+			{
+				throw new InvalidTicketException($"No ticket found for id {id}");
+			}
+
+			return ticket;
+		}
+	}
 
     public enum Priority
     {
