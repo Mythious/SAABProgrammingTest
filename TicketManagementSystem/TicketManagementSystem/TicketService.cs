@@ -4,6 +4,7 @@ using TicketManagementSystem.NotificationFeature;
 using TicketManagementSystem.PriceFeature;
 using TicketManagementSystem.PriorityFeature;
 using TicketManagementSystem.TicketsFeature.Models;
+using TicketManagementSystem.TicketsFeature.Repositories;
 using TicketManagementSystem.TicketsFeature.Validators;
 using TicketManagementSystem.UserFeature.Models;
 using TicketManagementSystem.UserFeature.Services;

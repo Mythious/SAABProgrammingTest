@@ -2,7 +2,7 @@
 using System.Linq;
 using TicketManagementSystem.TicketsFeature.Models;
 
-namespace TicketManagementSystem
+namespace TicketManagementSystem.TicketsFeature.Repositories
 {
     public static class TicketRepository
     {
