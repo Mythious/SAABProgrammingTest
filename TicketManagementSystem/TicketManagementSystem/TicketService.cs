@@ -128,12 +128,6 @@ namespace TicketManagementSystem
 		{
 			return isPayingCustomer ? _userService.GetAccountManager() : null;
 		}
-
-		private void WriteTicketToFile(Ticket ticket)
-        {
-            var ticketJson = JsonSerializer.Serialize(ticket);
-            File.WriteAllText(Path.Combine(Path.GetTempPath(), $"ticket_{ticket.Id}.json"), ticketJson);
-        }
     }
 
     public enum Priority
