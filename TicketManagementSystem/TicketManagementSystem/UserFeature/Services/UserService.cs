@@ -1,4 +1,6 @@
-﻿namespace TicketManagementSystem.UserFeature.Services
+﻿using TicketManagementSystem.UserFeature.Exceptions;
+
+namespace TicketManagementSystem.UserFeature.Services
 {
 	/// <summary>
 	/// Provides services for managing and retrieving user-related data.

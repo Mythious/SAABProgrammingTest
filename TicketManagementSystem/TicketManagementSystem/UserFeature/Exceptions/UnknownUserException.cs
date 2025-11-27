@@ -1,5 +1,5 @@
 ﻿using System;
-namespace TicketManagementSystem
+namespace TicketManagementSystem.UserFeature.Exceptions
 {
     public class UnknownUserException : Exception
     {

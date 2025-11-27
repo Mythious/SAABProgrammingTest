@@ -1,4 +1,5 @@
 ﻿using TicketManagementSystem.Core.Validators;
+using TicketManagementSystem.TicketsFeature.Exceptions;
 using TicketManagementSystem.TicketsFeature.Models;
 
 namespace TicketManagementSystem.TicketsFeature.Validators

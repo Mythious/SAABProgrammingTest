@@ -1,5 +1,5 @@
 ﻿using System;
-namespace TicketManagementSystem
+namespace TicketManagementSystem.TicketsFeature.Exceptions
 {
     public class InvalidTicketException : Exception
     {
