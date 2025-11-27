@@ -6,32 +6,24 @@ using EmailService;
 using TicketManagementSystem.Core.Validators;
 using TicketManagementSystem.TicketsFeature.Models;
 using TicketManagementSystem.TicketsFeature.Validators;
+using TicketManagementSystem.UserFeature.Services;
 
 namespace TicketManagementSystem
 {
     public class TicketService
     {
         // Implemented concrete implementations due to the requirements of keeping Program.cs unchanged.
-        // These implementations would normally be dependency injected during the bootstrap of the application.
+        // These implementations would normally be dependency injected within the constructor during the bootstrap of the application.
         private readonly IValidator<TicketTextData> _ticketTextValidator = new TicketTextValidator();
+        private readonly IUserService _userService = new UserService();
         
         public int CreateTicket(string title, Priority priority, string assignedTo, string description, DateTime timeStamp, bool isPayingCustomer)
         {
+            // Check to see if the title or description are null. If so, throw an exception.
             _ticketTextValidator.Validate(new TicketTextData(title, description));
-
-            User user = null;
-            using (var ur = new UserRepository())
-            {
-                if (assignedTo != null)
-                {
-                    user = ur.GetUser(assignedTo);
-                }
-            }
-
-            if (user == null)
-            {
-                throw new UnknownUserException("User " + assignedTo + " not found");
-            }
+            
+            // Get the found user or return null if they cannot be found
+            var foundUser = _userService.GetUser(assignedTo);
 
             var priorityRaised = false;
             if (timeStamp < DateTime.UtcNow - TimeSpan.FromHours(1))
@@ -67,11 +59,8 @@ namespace TicketManagementSystem
             }
 
             double price = 0;
-            User accountManager = null;
             if (isPayingCustomer)
             {
-                // Only paid customers have an account manager.
-                accountManager = new UserRepository().GetAccountManager();
                 if (priority == Priority.High)
                 {
                     price = 100;
@@ -85,12 +74,12 @@ namespace TicketManagementSystem
             var ticket = new Ticket()
             {
                 Title = title,
-                AssignedUser = user,
+                AssignedUser = foundUser,
                 Priority = priority,
                 Description = description,
                 Created = timeStamp,
                 PriceDollars = price,
-                AccountManager = accountManager
+                AccountManager = GetAccountManagerIfPayingCustomer(isPayingCustomer)
             };
 
             var id = TicketRepository.CreateTicket(ticket);
@@ -127,7 +116,20 @@ namespace TicketManagementSystem
             TicketRepository.UpdateTicket(ticket);
         }
 
-        private void WriteTicketToFile(Ticket ticket)
+        /// <summary>
+        /// Retrieves the account manager if the customer is a paying customer.
+        /// </summary>
+        /// <param name="isPayingCustomer">A boolean value indicating whether the customer is a paying customer.</param>
+        /// <returns>
+        /// The <see cref="User"/> object representing the account manager if the customer is a paying customer; 
+        /// otherwise, <c>null</c>.
+        /// </returns>
+		private User GetAccountManagerIfPayingCustomer(bool isPayingCustomer)
+		{
+			return isPayingCustomer ? _userService.GetAccountManager() : null;
+		}
+
+		private void WriteTicketToFile(Ticket ticket)
         {
             var ticketJson = JsonSerializer.Serialize(ticket);
             File.WriteAllText(Path.Combine(Path.GetTempPath(), $"ticket_{ticket.Id}.json"), ticketJson);
