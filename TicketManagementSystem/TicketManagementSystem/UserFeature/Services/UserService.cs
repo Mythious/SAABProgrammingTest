@@ -1,5 +1,6 @@
 ﻿using TicketManagementSystem.UserFeature.Exceptions;
 using TicketManagementSystem.UserFeature.Models;
+using TicketManagementSystem.UserFeature.Repositories;
 
 namespace TicketManagementSystem.UserFeature.Services
 {
