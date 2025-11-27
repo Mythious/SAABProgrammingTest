@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using EmailService;
 using TicketManagementSystem.Core.Validators;
+using TicketManagementSystem.PriorityFeature;
 using TicketManagementSystem.TicketsFeature.Models;
 using TicketManagementSystem.TicketsFeature.Validators;
 using TicketManagementSystem.UserFeature.Services;
@@ -16,8 +17,9 @@ namespace TicketManagementSystem
         // These implementations would normally be dependency injected within the constructor during the bootstrap of the application.
         private readonly IValidator<TicketTextData> _ticketTextValidator = new TicketTextValidator();
         private readonly IUserService _userService = new UserService();
+        private readonly IPriorityCalculator _priorityCalculator = new PriorityCalculator();
         
-        public int CreateTicket(string title, Priority priority, string assignedTo, string description, DateTime timeStamp, bool isPayingCustomer)
+        public int CreateTicket(string title, Priority initialPriority, string assignedTo, string description, DateTime timeStamp, bool isPayingCustomer)
         {
             // Check to see if the title or description are null. If so, throw an exception.
             _ticketTextValidator.Validate(new TicketTextData(title, description));
@@ -25,32 +27,8 @@ namespace TicketManagementSystem
             // Get the found user or return null if they cannot be found
             var foundUser = _userService.GetUser(assignedTo);
 
-            var priorityRaised = false;
-            if (timeStamp < DateTime.UtcNow - TimeSpan.FromHours(1))
-            {
-                if (priority == Priority.Low)
-                {
-	                priority = Priority.Medium;
-                    priorityRaised = true;
-                }
-                else if (priority == Priority.Medium)
-                {
-	                priority = Priority.High;
-                    priorityRaised = true;
-                }
-            }
-
-            if ((title.Contains("Crash") || title.Contains("Important") || title.Contains("Failure")) && !priorityRaised)
-            {
-                if (priority == Priority.Low)
-                {
-                    priority = Priority.Medium;
-                }
-                else if (priority == Priority.Medium)
-                {
-                    priority = Priority.High;
-                }
-            }
+            // Calculate the priority given the provided title, initial priority and description
+            var priority = _priorityCalculator.Calculate(title, initialPriority, timeStamp);
 
             if (priority == Priority.High)
             {
@@ -90,19 +68,8 @@ namespace TicketManagementSystem
 
         public void AssignTicket(int id, string username)
         {
-            User user = null;
-            using (var ur = new UserRepository())
-            {
-                if (username != null)
-                {
-                    user = ur.GetUser(username);
-                }
-            }
-
-            if (user == null)
-            {
-                throw new UnknownUserException("User not found");
-            }
+            // Acquire the user from the username
+            var user = _userService.GetUser(username);
 
             var ticket = TicketRepository.GetTicket(id);
 
