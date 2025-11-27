@@ -5,6 +5,7 @@ using System.Text.Json;
 using EmailService;
 using TicketManagementSystem.Core.Validators;
 using TicketManagementSystem.NotificationFeature;
+using TicketManagementSystem.PriceFeature;
 using TicketManagementSystem.PriorityFeature;
 using TicketManagementSystem.TicketsFeature.Models;
 using TicketManagementSystem.TicketsFeature.Validators;
@@ -20,6 +21,7 @@ namespace TicketManagementSystem
         private readonly IUserService _userService = new UserService();
         private readonly IPriorityCalculator _priorityCalculator = new PriorityCalculator();
         private readonly INotificationService _notificationService = new NotificationService();
+        private readonly IPriceCalculatorService _priceCalculatorService = new PriceCalculatorService();
         
         public int CreateTicket(string title, Priority initialPriority, string assignedTo, string description, DateTime timeStamp, bool isPayingCustomer)
         {
@@ -35,18 +37,8 @@ namespace TicketManagementSystem
 			// Notify the administrator if the priority is high
 			_notificationService.EmailTicketAdministrator(title, assignedTo, priority);
 
-			double price = 0;
-            if (isPayingCustomer)
-            {
-                if (priority == Priority.High)
-                {
-                    price = 100;
-                }
-                else
-                {
-                    price = 50;
-                }
-            }
+			// Calculate the price determined by priority. If the user is not a paying customer, 0 is returned.
+			var price = _priceCalculatorService.Calculate(priority, isPayingCustomer);
 
             var ticket = new Ticket()
             {
